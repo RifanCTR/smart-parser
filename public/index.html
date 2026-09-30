@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AI Smart Data Parser</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0f1115;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: min(1400px, 94%);
+            margin: auto;
+            padding: 40px 0;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #9ca3af;
+        }
+
+        .card {
+            background: #171a21;
+            border: 1px solid #272c36;
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 260px;
+            resize: vertical;
+
+            background: #0d0f13;
+            border: 1px solid #303641;
+            border-radius: 12px;
+
+            padding: 16px;
+
+            color: #ffffff;
+
+            font-size: 14px;
+            line-height: 1.6;
+
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #2563eb;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+
+            font-size: 14px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        .btn-ai {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-ai:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-clear {
+            background: #272c36;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #343b48;
+        }
+
+        .btn-excel {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-excel:hover {
+            background: #15803d;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+
+        /* ========================================
+           PROGRESS
+        ======================================== */
+
+        .progress-area {
+            display: none;
+            margin-top: 18px;
+        }
+
+        .progress-area.show {
+            display: block;
+        }
+
+        .progress-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 8px;
+        }
+
+        .progress-text {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        .progress-check {
+            display: none;
+
+            font-size: 13px;
+            font-weight: bold;
+
+            color: #4ade80;
+        }
+
+        .progress-check.show {
+            display: block;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+
+            background: #252a33;
+
+            border-radius: 999px;
+
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+
+            background: linear-gradient(
+                90deg,
+                #2563eb,
+                #22c55e
+            );
+
+            border-radius: 999px;
+
+            transition:
+                width 0.5s ease;
+        }
+
+        .progress-bar.done {
+            background: #22c55e;
+        }
+
+        .progress-bar.error {
+            background: #ef4444;
+        }
+
+
+        /* ========================================
+           STATUS
+        ======================================== */
+
+        .status {
+            display: none;
+
+            margin-top: 15px;
+            padding: 12px;
+
+            border-radius: 10px;
+
+            background: #111827;
+            color: #9ca3af;
+
+            font-size: 14px;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.error {
+            background: #3f1717;
+            color: #fca5a5;
+        }
+
+        .status.success {
+            background: #12351f;
+            color: #86efac;
+        }
+
+
+        /* ========================================
+           TABLE
+        ======================================== */
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+
+            border: 1px solid #292f39;
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+
+            min-width: 800px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid #292f39;
+
+            padding: 12px;
+
+            text-align: left;
+
+            font-size: 13px;
+
+            vertical-align: top;
+        }
+
+        th {
+            background: #20242d;
+            color: #ffffff;
+
+            white-space: nowrap;
+        }
+
+        td {
+            color: #d1d5db;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .empty {
+            padding: 40px;
+
+            text-align: center;
+
+            color: #6b7280;
+        }
+
+
+        /* ========================================
+           RESULT HEADER
+        ======================================== */
+
+        .result-header {
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 15px;
+
+            flex-wrap: wrap;
+        }
+
+        .result-info {
+            color: #9ca3af;
+
+            font-size: 14px;
+        }
+
+
+        /* ========================================
+           MOBILE
+        ======================================== */
+
+        @media (max-width: 600px) {
+
+            .container {
+                width: 92%;
+                padding: 25px 0;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            textarea {
+                min-height: 220px;
+            }
+
+            .actions button {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- ========================================
+         HEADER
+    ======================================== -->
+
+    <div class="header">
+
+        <h1>
+            AI Smart Data Parser
+        </h1>
+
+        <p>
+            Ubah teks OCR berantakan menjadi tabel
+            terstruktur menggunakan Gemini AI.
+        </p>
+
+    </div>
+
+
+
+    <!-- ========================================
+         INPUT
+    ======================================== -->
+
+    <div class="card">
+
+        <div class="card-title">
+            Input Teks OCR
+        </div>
+
+
+        <textarea
+            id="ocrText"
+            placeholder="Paste teks OCR di sini..."
+        ></textarea>
+
+
+        <div class="actions">
+
+            <button
+                class="btn-ai"
+                id="parseButton"
+                onclick="parseData()"
+            >
+                Analisis dengan AI
+            </button>
+
+
+            <button
+                class="btn-clear"
+                onclick="clearData()"
+            >
+                Hapus
+            </button>
+
+        </div>
+
+
+
+        <!-- ========================================
+             PROGRESS BAR
+        ======================================== -->
+
+        <div
+            id="progressArea"
+            class="progress-area"
+        >
+
+            <div class="progress-top">
+
+                <span
+                    id="progressText"
+                    class="progress-text"
+                >
+                    AI sedang membaca data...
+                </span>
+
+
+                <span
+                    id="progressCheck"
+                    class="progress-check"
+                >
+                    ✓ Siap
+                </span>
+
+            </div>
+
+
+            <div class="progress-track">
+
+                <div
+                    id="progressBar"
+                    class="progress-bar"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ========================================
+             STATUS
+        ======================================== -->
+
+        <div
+            id="status"
+            class="status"
+        ></div>
+
+    </div>
+
+
+
+    <!-- ========================================
+         RESULT
+    ======================================== -->
+
+    <div class="card">
+
+        <div class="result-header">
+
+            <div>
+
+                <div class="card-title">
+                    Hasil Data
+                </div>
+
+                <div
+                    id="resultInfo"
+                    class="result-info"
+                >
+                    Belum ada data.
+                </div>
+
+            </div>
+
+
+            <button
+                id="excelButton"
+                class="btn-excel"
+                onclick="downloadExcel()"
+                disabled
+            >
+                Download Excel
+            </button>
+
+        </div>
+
+
+        <div
+            id="tableContainer"
+            class="table-wrapper"
+        >
+
+            <div class="empty">
+                Hasil AI akan muncul di sini.
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+// ========================================
+// GLOBAL DATA
+// ========================================
+
+let parsedData = [];
+
+let progressTimer = null;
+
+
+
+// ========================================
+// START PROGRESS
+// ========================================
+
+function startProgress() {
+
+    const area =
+        document.getElementById(
+            "progressArea"
+        );
+
+    const bar =
+        document.getElementById(
+            "progressBar"
+        );
+
+    const text =
+        document.getElementById(
+            "progressText"
+        );
+
+    const check =
+        document.getElementById(
+            "progressCheck"
+        );
+
+
+    area.classList.add("show");
+
+    check.classList.remove("show");
+
+    bar.classList.remove(
+        "done",
+        "error"
+    );
+
+    bar.style.width = "0%";
+
+    text.textContent =
+        "AI sedang membaca data...";
+
+
+    let progress = 0;
+
+
+    clearInterval(progressTimer);
+
+
+    progressTimer =
+        setInterval(() => {
+
+            /*
+                Jangan sampai penuh sebelum
+                response Gemini selesai.
+            */
+
+            if (progress < 88) {
+
+                progress +=
+                    Math.random() * 4;
+
+                if (progress > 88) {
+                    progress = 88;
+                }
+
+                bar.style.width =
+                    progress + "%";
+            }
+
+        }, 500);
+
+}
+
+
+
+// ========================================
+// COMPLETE PROGRESS
+// ========================================
+
+function completeProgress() {
+
+    const bar =
+        document.getElementById(
+            "progressBar"
+        );
+
+    const text =
+        document.getElementById(
+            "progressText"
+        );
+
+    const check =
+        document.getElementById(
+            "progressCheck"
+        );
+
+
+    clearInterval(progressTimer);
+
+
+    bar.style.width = "100%";
+
+    bar.classList.add("done");
+
+    text.textContent =
+        "Data berhasil diproses";
+
+    check.classList.add("show");
+
+}
+
+
+
+// ========================================
+// ERROR PROGRESS
+// ========================================
+
+function errorProgress() {
+
+    const bar =
+        document.getElementById(
+            "progressBar"
+        );
+
+    const text =
+        document.getElementById(
+            "progressText"
+        );
+
+    const check =
+        document.getElementById(
+            "progressCheck"
+        );
+
+
+    clearInterval(progressTimer);
+
+
+    bar.classList.add("error");
+
+    text.textContent =
+        "Gagal memproses data";
+
+    check.classList.remove("show");
+
+}
+
+
+
+// ========================================
+// PARSE DATA
+// ========================================
+
+async function parseData() {
+
+    const textarea =
+        document.getElementById(
+            "ocrText"
+        );
+
+    const button =
+        document.getElementById(
+            "parseButton"
+        );
+
+
+    const text =
+        textarea.value.trim();
+
+
+    // ========================================
+    // VALIDASI
+    // ========================================
+
+    if (!text) {
+
+        showStatus(
+            "Masukkan teks OCR terlebih dahulu.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    // ========================================
+    // RESET
+    // ========================================
+
+    button.disabled = true;
+
+    button.textContent =
+        "Memproses...";
+
+
+    startProgress();
+
+
+    showStatus(
+        "Gemini sedang membaca dan menyusun data...",
+        ""
+    );
+
+
+    try {
+
+
+        // ========================================
+        // REQUEST SERVER
+        // ========================================
+
+        const response =
+            await fetch(
+                "/api/parse",
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+                            text: text
+                        })
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        // ========================================
+        // ERROR
+        // ========================================
+
+        if (
+            !response.ok ||
+            !result.success
+        ) {
+
+            throw new Error(
+                result.error ||
+                "Terjadi kesalahan pada server."
+            );
+
+        }
+
+
+        // ========================================
+        // SIMPAN
+        // ========================================
+
+        parsedData =
+            Array.isArray(result.data)
+                ? result.data
+                : [];
+
+
+        // ========================================
+        // SELESAI
+        // ========================================
+
+        completeProgress();
+
+
+        // ========================================
+        // RENDER
+        // ========================================
+
+        renderTable(
+            parsedData
+        );
+
+
+        document
+            .getElementById(
+                "excelButton"
+            )
+            .disabled =
+            parsedData.length === 0;
+
+
+        showStatus(
+            `Berhasil membaca ${parsedData.length} data.`,
+            "success"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        errorProgress();
+
+
+        showStatus(
+            error.message,
+            "error"
+        );
+
+
+    } finally {
+
+        button.disabled = false;
+
+        button.textContent =
+            "Analisis dengan AI";
+
+    }
+
+}
+
+
+
+// ========================================
+// RENDER TABLE
+// ========================================
+
+function renderTable(data) {
+
+    const container =
+        document.getElementById(
+            "tableContainer"
+        );
+
+    const resultInfo =
+        document.getElementById(
+            "resultInfo"
+        );
+
+
+    if (!data.length) {
+
+        container.innerHTML = `
+            <div class="empty">
+                AI tidak menemukan data.
+            </div>
+        `;
+
+        resultInfo.textContent =
+            "0 data";
+
+        return;
+    }
+
+
+    // ========================================
+    // CARI SEMUA KOLOM
+    // ========================================
+
+    const columns = [];
+
+
+    data.forEach(row => {
+
+        Object.keys(row)
+            .forEach(key => {
+
+                if (
+                    !columns.includes(key)
+                ) {
+
+                    columns.push(key);
+
+                }
+
+            });
+
+    });
+
+
+    // ========================================
+    // HEADER
+    // ========================================
+
+    let html = `
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        No
+                    </th>
+
+    `;
+
+
+    columns.forEach(
+        column => {
+
+            html += `
+
+                <th>
+                    ${escapeHtml(
+                        column
+                    )}
+                </th>
+
+            `;
+
+        }
+    );
+
+
+    html += `
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+    `;
+
+
+    // ========================================
+    // ROW
+    // ========================================
+
+    data.forEach(
+        (row, index) => {
+
+            html += `
+
+                <tr>
+
+                    <td>
+                        ${index + 1}
+                    </td>
+
+            `;
+
+
+            columns.forEach(
+                column => {
+
+                    const value =
+                        row[column] ?? "";
+
+
+                    html += `
+
+                        <td>
+                            ${escapeHtml(
+                                String(value)
+                            )}
+                        </td>
+
+                    `;
+
+                }
+            );
+
+
+            html += `
+
+                </tr>
+
+            `;
+
+        }
+    );
+
+
+    html += `
+
+            </tbody>
+
+        </table>
+
+    `;
+
+
+    container.innerHTML =
+        html;
+
+
+    resultInfo.textContent =
+        `${data.length} data • ${columns.length} kolom`;
+
+}
+
+
+
+// ========================================
+// ESCAPE HTML
+// ========================================
+
+function escapeHtml(value) {
+
+    return value
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+
+// ========================================
+// STATUS
+// ========================================
+
+function showStatus(
+    message,
+    type
+) {
+
+    const status =
+        document.getElementById(
+            "status"
+        );
+
+
+    status.textContent =
+        message;
+
+
+    status.className =
+        "status show";
+
+
+    if (type) {
+
+        status.classList.add(
+            type
+        );
+
+    }
+
+}
+
+
+
+// ========================================
+// CLEAR
+// ========================================
+
+function clearData() {
+
+    clearInterval(
+        progressTimer
+    );
+
+
+    parsedData = [];
+
+
+    document
+        .getElementById(
+            "ocrText"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "tableContainer"
+        )
+        .innerHTML = `
+
+            <div class="empty">
+                Hasil AI akan muncul di sini.
+            </div>
+
+        `;
+
+
+    document
+        .getElementById(
+            "resultInfo"
+        )
+        .textContent =
+        "Belum ada data.";
+
+
+    document
+        .getElementById(
+            "excelButton"
+        )
+        .disabled = true;
+
+
+    document
+        .getElementById(
+            "progressArea"
+        )
+        .classList.remove(
+            "show"
+        );
+
+
+    document
+        .getElementById(
+            "progressBar"
+        )
+        .style.width =
+        "0%";
+
+
+    document
+        .getElementById(
+            "status"
+        )
+        .className =
+        "status";
+
+}
+
+
+
+// ========================================
+// DOWNLOAD CSV
+// ========================================
+
+function downloadExcel() {
+
+    if (
+        !parsedData.length
+    ) {
+        return;
+    }
+
+
+    const columns = [];
+
+
+    parsedData.forEach(
+        row => {
+
+            Object.keys(row)
+                .forEach(key => {
+
+                    if (
+                        !columns.includes(key)
+                    ) {
+
+                        columns.push(key);
+
+                    }
+
+                });
+
+        }
+    );
+
+
+    let csv = "";
+
+
+    csv +=
+        columns
+            .map(
+                column =>
+                    csvEscape(column)
+            )
+            .join(",");
+
+
+    csv += "\n";
+
+
+    parsedData.forEach(
+        row => {
+
+            csv +=
+                columns
+                    .map(
+                        column =>
+                            csvEscape(
+                                row[column] ?? ""
+                            )
+                    )
+                    .join(",");
+
+            csv += "\n";
+
+        }
+    );
+
+
+    const blob =
+        new Blob(
+            [
+                "\ufeff" + csv
+            ],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        "hasil_ai_parser.csv";
+
+
+    document
+        .body
+        .appendChild(
+            link
+        );
+
+
+    link.click();
+
+
+    link.remove();
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+}
+
+
+
+// ========================================
+// CSV ESCAPE
+// ========================================
+
+function csvEscape(value) {
+
+    return `"${String(value)
+        .replace(
+            /"/g,
+            '""'
+        )}"`;
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>
